@@ -1,6 +1,7 @@
 import math
+from tree import Tree
 
-TEST_DATA = "J:\\hotAliMachineLearning\\noisy_train.ssv"
+TEST_DATA = "E:\\Projects\\hotALI\\noisy_train.ssv"
 LABEL = 0  # label column
 TREE = {}
 data = open(TEST_DATA)
@@ -60,13 +61,13 @@ def gain(l_matrix, f_matrix, feature_list_g, feature, yes, no):
     return ig, attr
 
 
-def find_root(new_matrix, attr_list):
+def find_root(lab_matrix, new_matrix, attr_list, yes_num, no_num):
     tup_list = {}
     for j in attr_list:
-        temp = gain(label_matrix, new_matrix, attr_list, j, label_yes, label_no)
+        temp = gain(lab_matrix, new_matrix, attr_list, j, yes_num, no_num)
         tup_list[temp[0]] = [j, temp[1]]
     root = max([q for q in tup_list])
-    return tup_list[root], root
+    return tup_list[root]  # , root
 
 
 def rebuild_matrix(feature, features_list, factor, main_matrix, label_list):
@@ -76,13 +77,27 @@ def rebuild_matrix(feature, features_list, factor, main_matrix, label_list):
     new_label = []
     for row in main_matrix:
         if row[feature_index] == factor:
-            new_matrix.append(row.pop(feature_index))
+            temp = row
+            temp.pop(feature_index)
+            new_matrix.append(temp)
             new_label.append(label_list[main_matrix.index(row)])
     return new_label, new_matrix, features_list
 
 
-def build_tree():
-    pass
+def build_tree(f_mat, f_list, l_list, ly, ln):
+    builder = find_root(l_list, f_mat, f_list, ly, ln)
+    TREE[builder[0]] = builder[1]
+    for item in TREE[builder[0]]:
+        if 'yes' in TREE[builder[0]][item] and 'no' in TREE[builder[0]][item]:
+            new_l, new_m, new_f_list = rebuild_matrix(builder[0], f_list, item, f_mat, l_list)
+            return {find_root(new_l, new_m, new_f_list, TREE[builder[0]][item]['yes'], TREE[builder[0]][item]['no'])[0]: build_tree(new_m, new_f_list, new_l, TREE[builder[0]][item]['yes'], TREE[builder[0]][item]['no'])}
+        else:
+            if 'yes' in TREE[builder[0]][item]:
+                return True
+            else:
+                return False
 
 
-print(find_root(feature_matrix, feature_list))
+a = build_tree(feature_matrix, feature_list, label_matrix, label_yes, label_no)
+print(a)
+# print(find_root(feature_matrix, feature_list, label_yes, label_no))
