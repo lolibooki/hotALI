@@ -3,7 +3,7 @@ from tree import Tree
 
 TEST_DATA = "E:\\Projects\\hotALI\\noisy_train.ssv"
 LABEL = 0  # label column
-TREE = {}
+TREE = []
 data = open(TEST_DATA)
 new_data = data.read().splitlines()
 matrix = []
@@ -86,16 +86,18 @@ def rebuild_matrix(feature, features_list, factor, main_matrix, label_list):
 
 def build_tree(f_mat, f_list, l_list, ly, ln):
     builder = find_root(l_list, f_mat, f_list, ly, ln)
-    TREE[builder[0]] = builder[1]
-    for item in TREE[builder[0]]:
-        if 'yes' in TREE[builder[0]][item] and 'no' in TREE[builder[0]][item]:
-            new_l, new_m, new_f_list = rebuild_matrix(builder[0], f_list, item, f_mat, l_list)
-            return {find_root(new_l, new_m, new_f_list, TREE[builder[0]][item]['yes'], TREE[builder[0]][item]['no'])[0]: build_tree(new_m, new_f_list, new_l, TREE[builder[0]][item]['yes'], TREE[builder[0]][item]['no'])}
+    temp_attr = [q for q in builder[1]]
+    TREE.append([builder[0], temp_attr])
+    for item in temp_attr:
+        if 'yes' in builder[1][item] and 'no' in builder[1][item]:
+            n_l, n_m, f_l = rebuild_matrix(builder[0], f_list, item, f_mat, l_list)
+            TREE.append([builder[0], item, build_tree(n_m, f_l, n_l, builder[1][item]['yes'], builder[1][item]['no'])])
         else:
-            if 'yes' in TREE[builder[0]][item]:
-                return True
+            if 'yes' in builder[1][item]:
+                TREE.append([builder[0], item, True])
             else:
-                return False
+                TREE.append([builder[0], item, False])
+    return TREE
 
 
 a = build_tree(feature_matrix, feature_list, label_matrix, label_yes, label_no)
