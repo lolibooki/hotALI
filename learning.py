@@ -1,7 +1,7 @@
 import math
 from tree import Tree
 
-TEST_DATA = "E:\\Projects\\hotALI\\noisy_train.ssv"
+TEST_DATA = "noisy_train.ssv"
 LABEL = 0  # label column
 TREE = []
 data = open(TEST_DATA)
